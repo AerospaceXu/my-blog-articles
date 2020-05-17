@@ -6,7 +6,7 @@
 let obj = {
   foo() {
     console.log(this)
-  },
+  }
 }
 let bar = obj.foo
 obj.foo() // 打印出的 this 是 obj
@@ -15,28 +15,28 @@ bar() // 打印出的 this 是 window
 
 最后两行函数的值为什么不一样？？？
 
+this 关键字是 JavaScript 最复杂的机制之一，它是一个**特别的关键字**。
+
 之前关于函数的文章里写过了，`let bar = obj.foo`可以让`bar()`和`obj.foo()`等价，那为什么 this 指向不一样？
 
 在学 React 的时候，很多人会发现有个很烦人的操作，就是在`constructor`里面，需要`bind(this)`。
 
 **首先需要从函数的调用开始讲起。**
 
-ES5 里面有三种函数调用形式：
-
 ```javascript
 foo(p1, p2)
-console.log('================')
 obj.foo(p1, p2)
-console.log('================')
 foo.call(obj, p1, p2)
 /*
  *  或者apply或者bind，这三个都是用来绑定this的
  */
 ```
 
+这几种其实都是调用函数。那有什么区别呢？
+
 乍看之下，前两种简单，后面一种复杂。很多人就选择完全不使用后面的`call()`。
 
-但实际上，后面的才是我们真正的写法，前面的都可以等价的变成该种写法：
+但实际上，后面的方法是用来绑定 this 的，前面的方法属于“随缘绑定”，但都可以等价的变成该种写法：
 
 ```javascript
 func.call(context, p1, p2)
@@ -44,6 +44,18 @@ func.call(context, p1, p2)
 
 `foo(p1, p2)` 等价于 `foo.call(undefined, p1, p2)`
 `obj.foo(p1, p2)` 等价于 `obj.foo.call(obj, p1, p2)`
+
+**我们来实现一个简单的 bind**
+
+```javascript
+function bind(fn, obj) {
+  return function () {
+    return fn.apply(obj, arguments)
+  }
+}
+
+bin(foo, obj)
+```
 
 很多人特别喜欢死记硬背这个 this 的指向，“谁调用 this 就指向谁”blablabla……
 
@@ -87,7 +99,7 @@ func.call(obj) // 那么里面的 this 就是 obj 对象了
 let obj = {
   foo() {
     console.log(this)
-  },
+  }
 }
 obj.foo()
 ```
@@ -100,7 +112,7 @@ obj.foo()
 let obj = {
   foo() {
     console.log(this)
-  },
+  }
 }
 let bar = obj.foo
 obj.foo() // 转换为 obj.foo.call(obj)，this 就是 obj
