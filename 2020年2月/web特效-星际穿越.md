@@ -60,11 +60,11 @@ y 的值之所以取决于 width，是因为电脑一般都是长方形，并且
 let stars = [] // 存放星星的数组
 
 function setup() {
-	const starsNumber = 100 // 星星的个数
-	for (let i = 0; i < starsNumber; i++) {
-		const temp = new Star()
-		stars.push(temp)
-	}
+  const starsNumber = 100 // 星星的个数
+  for (let i = 0; i < starsNumber; i++) {
+    const temp = new Star()
+    stars.push(temp)
+  }
 }
 ```
 
@@ -74,12 +74,12 @@ function setup() {
 
 ```css
 * {
-	margin: 0;
-	padding: 0;
+  margin: 0;
+  padding: 0;
 }
 body {
-	width: 100vw;
-	height: 100vh;
+  width: 100vw;
+  height: 100vh;
 }
 ```
 
@@ -87,11 +87,11 @@ body {
 
 ```javascript
 function setup() {
-	const wid = document.body.offsetWidth
-	const heig = document.body.offsetHeight
-	createCanvas(wid, heig)
+  const wid = document.body.offsetWidth
+  const heig = document.body.offsetHeight
+  createCanvas(wid, heig)
 
-	// 这里放刚刚新建星星的代码
+  // 这里放刚刚新建星星的代码
 }
 ```
 
@@ -103,21 +103,21 @@ function setup() {
 let stars = []
 
 function setup() {
-	const wid = document.body.offsetWidth
-	const heig = document.body.offsetHeight
-	createCanvas(wid, heig)
-	const starsNumber = 100
-	for (let i = 0; i < starsNumber; i++) {
-		const temp = new Star()
-		stars.push(temp)
-	}
+  const wid = document.body.offsetWidth
+  const heig = document.body.offsetHeight
+  createCanvas(wid, heig)
+  const starsNumber = 100
+  for (let i = 0; i < starsNumber; i++) {
+    const temp = new Star()
+    stars.push(temp)
+  }
 }
 
 function draw() {
-	background('#000')
-	for (let i = 0; i < stars.length; i++) {
-		stars[i].show()
-	}
+  background('#000')
+  for (let i = 0; i < stars.length; i++) {
+    stars[i].show()
+  }
 }
 ```
 
@@ -188,65 +188,72 @@ function draw() {
 let stars = []
 
 function setup() {
-	const wid = document.body.offsetWidth
-	const heig = document.body.offsetHeight
-	createCanvas(wid, heig)
-	let starsNumber = parseInt((width * height) / 6500)
-	for (let i = 0; i < starsNumber; i++) {
-		const temp = new Star()
-		stars.push(temp)
-	}
+  const wid = document.body.offsetWidth
+  const heig = document.body.offsetHeight
+  createCanvas(wid, heig)
+  let starsNumber = parseInt((width * height) / 6500)
+  for (let i = 0; i < starsNumber; i++) {
+    const temp = new Star()
+    stars.push(temp)
+  }
 }
 
 function draw() {
-	translate(wid / 2, heig / 2)
-	background('#000')
-	for (let i = 0; i < stars.length; i++) {
-		stars[i].update(15)
-		stars[i].show()
-	}
+  translate(wid / 2, heig / 2)
+  background('#000')
+  for (let i = 0; i < stars.length; i++) {
+    stars[i].update(15)
+    stars[i].show()
+  }
 }
 ```
 
 ```javascript
 class Star {
-	constructor() {
-		this.x = random(-width / 2, width / 2)
-		this.y = random(-width / 2, width / 2)
-		this.z = random(0, width)
+  constructor() {
+    this.x = random(-width / 2, width / 2)
+    this.y = random(-width / 2, width / 2)
+    this.z = random(0, width)
 
-		this.r = 25 + random(-2, 3)
-		this.isMiss = false
-		this.sx
-		this.sy
-	}
+    this.r = 25 + random(-2, 3)
+    this.isMiss = false
+    this.sx
+    this.sy
+  }
 
-	update(speed) {
-		this.z -= speed
-		if (this.z <= 1) {
-			this.x = random(-width / 2, width / 2)
-			this.y = random(-width / 2, width / 2)
-			this.z = width
-			this.isMiss = false
-		}
-	}
+  update(speed) {
+    this.z -= speed
+    if (this.z <= 1) {
+      this.x = random(-width / 2, width / 2)
+      this.y = random(-width / 2, width / 2)
+      this.z = width
+      this.isMiss = false
+    }
+  }
 
-	show() {
-		fill(255)
-		noStroke()
-		const nowX = map(this.x / this.z, -1, 1, -width / 2, width / 2)
-		const nowY = map(this.y / this.z, -1, 1, -width / 2, width / 2)
-		if (!this.isMiss) {
-			this.sx = nowX
-			this.sy = nowY
-			this.isMiss = true
-		}
-		const nowR = map(this.z, 0, width, this.r, 0)
-		ellipse(nowX, nowY, nowR, nowR)
+  show() {
+    fill(255)
+    noStroke()
+    const nowX = map(this.x / this.z, -1, 1, -width / 2, width / 2)
+    const nowY = map(this.y / this.z, -1, 1, -width / 2, width / 2)
+    if (!this.isMiss) {
+      this.sx = nowX
+      this.sy = nowY
+      this.isMiss = true
+    }
+    const nowR = map(this.z, 0, width, this.r, 0)
+    ellipse(nowX, nowY, nowR, nowR)
 
-		stroke(255)
-		triangle(nowX + nowR / 3, nowY + nowR / 3, nowX - nowR / 3, nowY - nowR / 3, this.sx, this.sy)
-	}
+    stroke(255)
+    triangle(
+      nowX + nowR / 3,
+      nowY + nowR / 3,
+      nowX - nowR / 3,
+      nowY - nowR / 3,
+      this.sx,
+      this.sy
+    )
+  }
 }
 ```
 
