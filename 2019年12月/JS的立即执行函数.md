@@ -13,7 +13,7 @@
 
 我愣了一下，突然发现自己不是很能清晰的解答这个概念。
 
-我只知道`()`代表了两种作用：
+我只知道在 JS 中 `()` 代表了两种作用：
 
 - 包裹
 - 执行函数
@@ -45,32 +45,32 @@ function(){
 想要通过浏览器的语法检查，必须加点小东西，比如下面几种
 
 ```javascript
-;(function () {
-	alert('我是匿名函数')
+(function () {
+  alert('我是匿名函数');
 })()(
-	// 用括号把整个表达式包起来
-	function () {
-		alert('我是匿名函数')
-	}
-)() //用括号把函数包起来
+  // 用括号把整个表达式包起来
+  function () {
+    alert('我是匿名函数');
+  }
+)(); //用括号把函数包起来
 !(function () {
-	alert('我是匿名函数')
+  alert('我是匿名函数');
 })() + // 求反，我们不在意值是多少，只想通过语法检查。
-	(function () {
-		alert('我是匿名函数')
-	})() -
-	(function () {
-		alert('我是匿名函数')
-	})()
+  (function () {
+    alert('我是匿名函数');
+  })() -
+  (function () {
+    alert('我是匿名函数');
+  })();
 ~(function () {
-	alert('我是匿名函数')
-})()
+  alert('我是匿名函数');
+})();
 void (function () {
-	alert('我是匿名函数')
-})()
+  alert('我是匿名函数');
+})();
 new (function () {
-	alert('我是匿名函数')
-})()
+  alert('我是匿名函数');
+})();
 ```
 
 目前我也不是很清楚为什么，但是这些都是实验证明不会报错的写法。（所以大家都说 JS 诡异）
@@ -82,11 +82,11 @@ new (function () {
 这个作用域里面的变量，外面访问不到（即避免「变量污染」）。
 
 ```javascript
-var liList = ul.getElementsByTagName('li')
+var liList = ul.getElementsByTagName('li');
 for (var i = 0; i < 6; i++) {
-	liList[i].onclick = function () {
-		alert(i) // 为什么 alert 出来的总是 6，而不是 0、1、2、3、4、5
-	}
+  liList[i].onclick = function () {
+    alert(i); // 为什么 alert 出来的总是 6，而不是 0、1、2、3、4、5
+  };
 }
 ```
 
@@ -97,13 +97,13 @@ for (var i = 0; i < 6; i++) {
 用立即执行函数给每个 li 创造一个独立作用域即可：
 
 ```javascript
-var liList = ul.getElementsByTagName('li')
+var liList = ul.getElementsByTagName('li');
 for (var i = 0; i < 6; i++) {
-	!(function (ii) {
-		liList[ii].onclick = function () {
-			alert(ii) // 0、1、2、3、4、5
-		}
-	})(i)
+  !(function (ii) {
+    liList[ii].onclick = function () {
+      alert(ii); // 0、1、2、3、4、5
+    };
+  })(i);
 }
 ```
 
@@ -111,7 +111,7 @@ for (var i = 0; i < 6; i++) {
 
 i 的值从 0 变化到 5，对应 6 个立即执行函数，这 6 个立即执行函数里面的 ii 「分别」是 0、1、2、3、4、5。
 
-**但是这是用`var`声明，如果使用了`let`，不会出现这种问题！！！！！！**
+**但是这是用 `var` 声明，如果使用了 `let` ，不会出现这种问题！！！！！！**
 
 这就是立即执行函数的基本概念。
 
