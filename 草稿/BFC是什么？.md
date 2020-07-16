@@ -79,7 +79,7 @@ Box 是 CSS 的布局基本单位，即一个网页应该是由很多很多的 B
 
 可以理解为 BFC 就是**一个封闭的**大盒子，箱子内部的元素无论如何倒腾，都不会影响到外部的其他的箱子。
 
-**如何创建一个 BFC 呢？**
+## 2.1 如何创建一个 BFC
 
 - 根元素（<html>）
 - 浮动元素（元素的 float 不是 none）
@@ -103,3 +103,13 @@ Box 是 CSS 的布局基本单位，即一个网页应该是由很多很多的 B
 - 绝对定位元素：position (absolute、fixed)
 - display 为 inline-block、table-cells、flex
 - overflow 除了 visible 以外的值 (hidden、auto、scroll)
+
+### 2.2 BFC 有什么用？
+
+#### 阻止元素被浮动元素覆盖
+
+经常当我们 `float: left;` 之后，正常流的 div 就会被浮动的 div 所遮挡。如果通过设置 div 的 CSS 触发 BFC，就可以阻止浮动的盒子遮挡正常流。
+
+#### 可以包含浮动元素
+
+一般情况下，用一个 div 包裹另一个浮动的 div 时，外层的 div 是无法被撑开的。但通过各种方式让外层成为 BFC，就可以消除浮动带来的副作用。
