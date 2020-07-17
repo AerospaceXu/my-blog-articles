@@ -81,6 +81,8 @@ Box 是 CSS 的布局基本单位，即一个网页应该是由很多很多的 B
 
 ## 2.1 如何创建一个 BFC
 
+BFC 的创建规则是什么呢？MDN 文档为我们列出了如下几种：
+
 - 根元素（<html>）
 - 浮动元素（元素的 float 不是 none）
 - 绝对定位元素（元素的 position 为 absolute 或 fixed）
@@ -96,7 +98,7 @@ Box 是 CSS 的布局基本单位，即一个网页应该是由很多很多的 B
 - 多列容器（元素的 column-count 或 column-width 不为 auto，包括 column-count 为 1）
 - column-span 为 all 的元素始终会创建一个新的 BFC，即使该元素没有包裹在一个多列容器中（标准变更，Chrome bug）。
 
-有网友也整理了简化版本：
+也有网友也整理的简化版本：
 
 - body 根元素
 - 浮动元素：float 除 none 以外的值
@@ -104,12 +106,18 @@ Box 是 CSS 的布局基本单位，即一个网页应该是由很多很多的 B
 - display 为 inline-block、table-cells、flex
 - overflow 除了 visible 以外的值 (hidden、auto、scroll)
 
-### 2.2 BFC 有什么用？
+所以归根结底，BFC 有什么用？
 
-#### 阻止元素被浮动元素覆盖
+**1. 阻止元素被浮动元素覆盖**
 
 经常当我们 `float: left;` 之后，正常流的 div 就会被浮动的 div 所遮挡。如果通过设置 div 的 CSS 触发 BFC，就可以阻止浮动的盒子遮挡正常流。
 
-#### 可以包含浮动元素
+**2. 可以包含浮动元素**
 
 一般情况下，用一个 div 包裹另一个浮动的 div 时，外层的 div 是无法被撑开的。但通过各种方式让外层成为 BFC，就可以消除浮动带来的副作用。
+
+**3. 消除 margin 坍塌（margin-collapse）**
+
+当我们发现相邻的两个元素 margin 重叠，说明他们可能是隶属于同一个 BFC 的子元素，我们只需要将他们都变成 BFC，即可消除 margin 的坍塌现象。
+
+（完）
