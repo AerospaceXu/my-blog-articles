@@ -2,4 +2,351 @@
 
 本文写于 2020 年 7 月 25 日
 
+首先有个问题：Vue 是 MVC 还是 MVVM 框架？
+
+MVVM 是 PM 的变种，而 PM 又是 MVC 的变种。所以一定程度上来说，三者的思想方向是一样的。
+
+并且 Vue 的官网中也说道：“虽然没有完全遵循 MVVM 模型，但是 Vue 的设计也受到了它的启发。”
+
+这个问题网上吵得比较多，本文并不是来讨论这个问题的，而是面是向初学者浅浅的分析一下老大哥 **MVC 的思想在 Vue 中的体现**。
+
+大学时候专业里前后开了几门网页课，先是教授 HTML、CCC；后来一门课教了 JS；最后有一门教授 Vue 的课。
+
+由于我大学读的并不是计算机专业，而是艺术类的数字媒体艺术专业。所以大家对于编程的热情度几乎是负的。
+
+上学期的 JS 都没学好，一听说要学 Vue，大家的内心自然是崩溃的。课程上来就是一段代码：
+
+```javascript
+let app = new Vue({
+  el: '#app',
+  data: {
+    message: 'Hello Vue!'
+  }
+});
+```
+
+大家一开始的心声就是这样的：什么？！这是什么？谁看得懂！
+
+并且不光是初学者，一些写了一段时间 Vue 的人，懂得 el 是是什么、data 是什么，但可能也不清楚**为什么 Vue 要这么来组织代码——除非他学过 MVC**。
+
+## 1 一个 MVC 计数器
+
+一个 MVC 模块是三个对象的合体：M, V, C。
+
+- M，即为 Model，代表数据；
+- V，即为 View，代表视图；
+- C，即为 Controller，代表控制（业务逻辑）。
+
+严格来说……MCV 没有严格来说，MVC 的定义并不明确，所以我以为 MVC 其实是一种思想方向，代表着视图和业务逻辑互不干扰。
+
+还是那句话，放码过来。我们先实现一个非常常见的例子：加按钮与减按钮。
+
+### 普通版本 JS 计数器
+
+```html
+<div id="app">
+  <span>0</span>
+  <button id="add">+</button>
+  <button id="minus">-</button>
+</div>
+```
+
+我们希望的结果是，当我们点击 + 号时，`<span>` 中的数字就会 +1，点击 - 号时，同理就会 -1。
+
+我相信这种 JS 代码应该是信手拈来的对吧。
+
+```javascript
+const numberWrapper = document.querySelector('#app span');
+const addBtn = document.querySelector('#add');
+const minusBtn = document.querySelector('#minus');
+
+addBtn.addEventListener('click', () => {
+  const newNumber = parseInt(numberWrapper.innerText) + 1;
+  numberWrapper.innerText = newNumber.toString();
+});
+
+minusBtn.addEventListener('click', () => {
+  const newNumber = parseInt(numberWrapper.innerText) - 1;
+  numberWrapper.innerText = newNumber.toString();
+});
+```
+
+但这只是普通版，接下来让我们用 MVC 的方式来一步步的重构这个代码。
+
+### MVC 版本 JS 计数器
+
+首先我们想，这样写的一个计数器，如果需要修改，那我一方面要改 HTML 文件、一方面还要修改 JS 文件，何其麻烦！
+
+写到一起来吧：
+
+```javascript
+const app = document.querySelector('#app');
+
+const html = `
+  <span>0</span>
+  <button id="add">+</button>
+  <button id="minus">-</button>
+`;
+const counter = document.createElement('div');
+counter.innerHTML = html;
+app.appendChild(counter);
+```
+
+那么我们来梳理一下现在的代码：
+
+1. 首先我们需要创建 HTML 元素；
+2. 然后通过 CSS 选择器找到对应的 DOM 元素；
+3. 再对他们添加各种监听事件与操作。
+
+那我们可以大胆的猜测一下嘛，如何使用 MVC 思想呢？
+
+首先新建一个对象叫做 view 吧，再将我们的 html 代码放进去：
+
+```javascript
+const view = {
+  html: `
+    <span>0</span>
+    <button id="add">+</button>
+    <button id="minus">-</button>
+  `
+};
+```
+
+还有我们用来新建 div、将 html 代码放入 div、再将 div 放进 app 的操作，应该也是属于视图层。
+
+所以我们给 view 对象添加一个 render 方法：
+
+```javascript
+const view = {
+  // ...html...
+  render() {
+    const counter = document.createElement('div');
+    counter.innerHTML = view.html;
+    app.appendChild(counter);
+  }
+};
+
+view.render();
+```
+
+这样我们就搞定了 V，然后看看 C。除了视图和数据，其他的东西应该都属于 C，所以 DOM 元素的获取放在 C 里、事件绑定也放在 C 里。
+
+```javascript
+const controller = {
+  ui: {},
+  bindEvents() {}
+};
+```
+
+这里我们准备将 DOM 元素放在 ui 对象里，但是这里需要脑子转一下。
+
+一旦我们在这里写了 `querySelector`，那么必然是找不到元素的，因为我们还没有 render，根本没有那些按钮和数字。
+
+所以我们得在里面写一个 init 函数，这样我们执行初始化之后，他就会先去获取 DOM、再去绑定事件：
+
+```javascript
+init() {
+  this.ui = {
+    numberWrapper: document.querySelector('#app span'),
+    addBtn: document.querySelector('#add'),
+    minusBtn: document.querySelector('#minus')
+  };
+  controller.bindEvents();
+},
+```
+
+绑定事件的写法就非常简单了：
+
+```javascript
+bindEvents() {
+  controller.ui.addBtn.addEventListener('click', () => {
+    const newNumber = parseInt(controller.ui.numberWrapper.innerText) + 1;
+    controller.ui.numberWrapper.innerText = newNumber.toString();
+  });
+  controller.ui.minusBtn.addEventListener('click', () => {
+    const newNumber = parseInt(controller.ui.numberWrapper.innerText) - 1;
+    controller.ui.numberWrapper.innerText = newNumber.toString();
+  });
+}
+```
+
+接下来就是一个转折点了，**我们要创建一个 model 对象来保存数据**。
+
+```javascript
+const model = {
+  data: {
+    number: 100
+  }
+};
+```
+
+这个时候不知道大家有没有领悟到一些东西。
+
+**既然已经有了 model，我们何必还去操作 DOM 获取数据呢？**
+
+直接操作 model 多优雅呀！
+
+所以 bindEvents 可以改成这样：
+
+```javascript
+controller.ui.addBtn.addEventListener('click', () => {
+  model.data.number += 1;
+});
+controller.ui.minusBtn.addEventListener('click', () => {
+  model.data.number -= 1;
+});
+```
+
+那我们的 view 对象也需要修改，他也应该从 model 中获取数据：
+
+```javascript
+const view = {
+  html: `
+    <span>{{number}}</span>
+    ......
+  `,
+  render() {
+    const counter = document.createElement('div');
+    counter.innerHTML = view.html.replace('{{number}}', model.data.number);
+    app.appendChild(counter);
+  }
+};
+```
+
+但是我们这样操作虽然说修改了数据，可是并没有重新渲染到页面上呀。所以每次提交之后需要重新 render。
+
+此时问题出现了：点击 + 或者 - 后，数字只会变化一次，第二次点击便毫无用处！
+
+这是为什么呢？
+
+很简单，因为我们重新 render，导致俩**绑定了事件的 button 全都不是曾经的那个他了**。
+
+所以我们使用事件代理来解决这个问题——将事件绑定在外层的 div 上，然后判断点击对象的 id 即可。
+
+写法如下：
+
+```javascript
+const compute = e => {
+  switch (e.target.id) {
+    case 'add':
+      model.data.number += 1;
+      break;
+    case 'minus':
+      model.data.number -= 1;
+      break;
+    default:
+      return;
+  }
+  view.render();
+};
+```
+
+接下来我们会在 view 对象中添加一个 el 属性，用来存储我们创建的外层 div。
+
+```javascript
+const view = {
+  el: null,
+  // ......
+  render() {
+    if (!view.el) {
+      // 创建 div，并将 div 赋值给 el
+    } else {
+      // 将 el 的 innerHTML 更换为新的内容
+    }
+  }
+};
+```
+
+最后我们再进行一步优化。
+
+我们本身不应该知道在 render 时，应该 append 给哪一个元素。这个元素应该是别人传给我的，所以应该这么写：
+
+总代码：
+
+**MVC 之 V**
+
+```javascript
+const view = {
+  el: null,
+  html: `
+    <span>{{n}}</span>
+    <button id="add">+</button>
+    <button id="minus">-</button>
+  `,
+  render(container) {
+    if (!view.el) {
+      const counter = document.createElement('div');
+      view.el = counter;
+      counter.innerHTML = view.html.replace(
+        '{{n}}',
+        model.data.number.toString()
+      );
+      container.appendChild(counter);
+    } else {
+      view.el.innerHTML = view.html.replace(
+        '{{n}}',
+        model.data.number.toString()
+      );
+    }
+  }
+};
+```
+
+**MVC 之 M**
+
+```javascript
+const model = {
+  data: {
+    number: parseInt(window.localStorage.getItem('number')) || 0
+  },
+  save() {
+    window.localStorage.setItem('number', model.data.number.toString());
+  }
+};
+```
+
+**MVC 之 C**
+
+```javascript
+const controller = {
+  init(container) {
+    controller.ui = {
+      container
+    };
+    view.render(container);
+    controller.bindEvents();
+  },
+  bindEvents() {
+    controller.ui.container.addEventListener('click', e => {
+      switch (e.target.id) {
+        case 'add':
+          model.data.number += 1;
+          break;
+        case 'minus':
+          model.data.number -= 1;
+          break;
+        default:
+          return;
+      }
+      model.save();
+      view.render();
+    });
+  }
+};
+```
+
+使用方式：
+
+```javascript
+const app = document.querySelector('#app');
+
+controller.init(app);
+```
+
+这个时候我们的程序已经是一个比较完整的 MVC 模式了，但直接全部 render 非常浪费性能。
+
+所以 React 之类的框架会使用虚拟 DOM 和 diff 算法来只修改变化的 DOM。
+
+总的来说，我们的 MVC 思想，可以抽想成为一个公式：`view = render(data)`
+
 （完）
