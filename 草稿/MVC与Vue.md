@@ -347,6 +347,37 @@ controller.init(app);
 
 所以 React 之类的框架会使用虚拟 DOM 和 diff 算法来只修改变化的 DOM。
 
-总的来说，我们的 MVC 思想，可以抽想成为一个公式：`view = render(data)`
+总的来说，我们的 MVC 思想可以抽想成为一个公式：`view = render(data)`
+
+**使用 class 来优化代码**
+
+class 优化代码可以提升我们的代码复用程度，铭记：**程序员永远不要重复自己的操作**。
+
+先看看 Model：
+
+```javascript
+class Model {
+  constructor(options) {
+    for (let key in options) {
+      this[key] = options[key];
+    }
+  }
+
+  save() {
+    console.error('还未传入save函数');
+  }
+}
+
+export default Model;
+```
+
+这个非常简单，我们想要传入任何的东西，都在这个 option 里面，就像这样：
+
+```javascript
+const model = new Model({
+  data: {},
+  save() {}
+});
+```
 
 （完）
