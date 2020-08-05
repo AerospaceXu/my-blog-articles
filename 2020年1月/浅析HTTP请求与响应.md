@@ -1,10 +1,3 @@
-<!--
- * @Author: Aero Xu
- * @Date: 2020-05-17 19:04:12
- * @LastEditors: Aero Xu
- * @LastEditTime: 2020-05-26 19:26:10
--->
-
 # 用简单的 Node.js 后台程序浅析 HTTP 请求与响应
 
 本文写于 2020 年 1 月 18 日

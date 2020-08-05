@@ -1,12 +1,3 @@
-<!--
- * @Author: your name
- * @Date: 2020-05-22 20:35:22
- * @LastEditTime: 2020-05-22 21:54:34
- * @LastEditors: Please set LastEditors
- * @Description: In User Settings Edit
- * @FilePath: /undefined/Users/xhy666/DOM事件与事件委托.md
--->
-
 # DOM 事件与事件委托
 
 本文写于 2020 年 5 月 28 日
@@ -84,9 +75,9 @@ IE 认为应该调用 `.son` 的事件，网景认为应该调用 `.grandpa`。
 
 ```javascript
 father.addEventListener('click', e => {
-  console.log(e.target)
-  console.log(e.currentTarget)
-})
+  console.log(e.target);
+  console.log(e.currentTarget);
+});
 ```
 
 这里看到，我们传入了一个 e，这个 e 可以尝试打印出来，就会发现其实是`MouseEvent`。
