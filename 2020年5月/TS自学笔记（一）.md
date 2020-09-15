@@ -21,37 +21,21 @@
 我之前就犯过这个错误，我想让一个数组等于另一个被 push 一个新元素数组：
 
 ```javascript
-let newArr = arr.push('hello')
-newArr.filter(() => {})
+let newArr = arr.push('hello');
+newArr.filter(() => {});
 ```
 
-要知道，`arr.push`他的返回值是**新的数组长度！**
+要知道，`arr.push` 的返回值是**新的数组长度！**让一个 number 类型去使用数组方法，自然是会报错的。
 
-我让一个 number 类型去使用数组方法，自然是会报错的。
+好吧,我知道这样似乎非常愚蠢，但是总而言之，在日常写 JS 的报错中，有大把大把的错因都是这种**完全可以避免掉的问题**。
 
-好吧我知道这样似乎非常愚蠢，但是总而言之，在日常写 JS 的报错中，有大把大把的报错是因为这种**完全可以避免掉的问题**。
-
-如果是 Java，他会在编辑器内就给你划红线，不会等到你运行了，再去告诉你。
+如果是 Java 或是 C#，编辑器在还没运行时就给会你划上红线，不会等到你运行了再去告诉你你错了。
 
 这就是动态语言的毛病。
 
-**关于代码提示**
+所以我们需要学习 TypeScript，用它来构建应用，节省时间。_据说用了 TS，能有效减少 80%的 Bug（笑）_
 
-不仅如此，我们是否会在写代码的时候烦心于代码提示呢？
-
-比如我在某个 class 内部声明了一些变量，可是当我在其他地方进行实力化的时候，**统统都没有提示！**
-
-我必须要翻到这个 class 的文件，找到那些变量再确认一番。
-
-而 TS 的接口概念，可以帮助我们非常完美的解决问题！
-
----
-
-所以我们需要学习 TypeScript。
-
-据说用了 TS，能有效减少 80%的 Bug（笑）。
-
-但不管这是不是真的，从各个大框架对于 TS 的青睐程度来看，未来几年内，TS 必然会是绝对的热点之一！
+不管这是不是真的，从各个大框架对于 TS 的青睐程度来看，未来几年内，TS 必然会是绝对的热点之一！Angular 早早的就从 Angular.js 变成了 Angular（必须使用 TS）；React 对 TS 极其友好；Vue3 也开始使用 TS 重写。
 
 毕竟，现在已经不只是：
 
@@ -63,9 +47,7 @@ newArr.filter(() => {})
 
 ## 01 变量类型
 
-JS 是弱类型语言，TS 却不是。
-
-TS 拥有这些类型：
+JS 是弱类型语言，TS 却不是。TS 拥有这些类型：
 
 ```
 1. undefined
@@ -85,13 +67,17 @@ TS 拥有这些类型：
 12. never
 ```
 
+_注：对于 JS 来说，数组就是 Object 类型，并且在 JS 中数据类型并不是小写，而是大写。_
+
+_在 2020 年，JS 的数据类型增加了 BigInt 和 Symbol 两种。_
+
 number、string、boolean 没有什么特别好说的，和 JS 没什么区别，我来写几个我觉得比较重要的。
 
-**数组的声明**
+### 数组的声明
 
 ```typescript
-let list: number[] = [1, 2, 3]
-let list_b: Array<number> = [1, 2, 3]
+let list: number[] = [1, 2, 3];
+let list_b: Array<number> = [1, 2, 3];
 ```
 
 第一种方法不难理解，就是生命一个 number 数组。
@@ -104,7 +90,7 @@ let list_b: Array<number> = [1, 2, 3]
 
 ```typescript
 function identity(arg: number): number {
-  return arg
+  return arg;
 }
 ```
 
@@ -114,19 +100,15 @@ function identity(arg: number): number {
 
 ```typescript
 function identity<T>(arg: T): T {
-  return arg
+  return arg;
 }
 ```
 
-**identity 函数** 叫做泛型（注意，T 不是泛型！），因为它可以适用于多个类型。
+identity 函数叫做泛型（注意，T 不是泛型！），因为它可以适用于多个类型。
 
-T 是类型变量，它是一种特殊的变量，只用于表示类型而不是值。
+**T 是类型变量，它是一种特殊的变量，只用于表示类型而不是值。**它可以帮助我们捕获用户传入的类型，让我们可以对这个类型加以利用。
 
-它可以帮助我们捕获用户传入的类型，让我们可以对这个类型加以利用。
-
-其实之前的情况，我们可以通过 any 来实现，但是 any 就会让我们丢失 T 这一信息。
-
-在命名变量的时候有一个小坑，变量名不能命名为`name`，因为会与 DOM 中的全局 window 对象下的 name 属性出现重名。
+如果我们不确定传入的参数类型，我们是完全可以通过 any 来实现的，但是 any 就会让我们丢失 T 这一信息。
 
 **enum 是成组常量的好用法！**
 
@@ -171,11 +153,11 @@ enum Hello {
 
 ```typescript
 function error(message: string): never {
-  throw new Error(message)
+  throw new Error(message);
 }
 
 function fail() {
-  return error('Something failed')
+  return error('Something failed');
 }
 
 function infiniteLoop(): never {
@@ -186,5 +168,7 @@ function infiniteLoop(): never {
 总体来讲大同小异，TS 补充了一些在别的语言中有过的常见数据类型，相信这一块对于 JS 开发者来说，不会是什么难题。
 
 唯一的难题就是习惯，可不能老是使用 any 类型！
+
+PS: 在命名变量的时候有一个小坑，变量名不能命名为`name`，因为会与 DOM 中的全局 `window` 对象下的 `name` 属性出现重名。
 
 （未完待续）
