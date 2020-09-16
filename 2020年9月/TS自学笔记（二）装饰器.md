@@ -1,0 +1,74 @@
+# TS 自学笔记（二）装饰器
+
+本文写于 2020 年 9 月 15 日
+
+上一篇 TS 文章已经是很久之前了。这次来讲一下 TS 的装饰器。
+
+对于前端而言，装饰器是一个陌生的概念，但是对于 Java、C# 等语言来说装饰器这一概念并不陌生。
+
+所谓装饰器，就是一种特殊的**类型声明**，它可以被附加到「属性」、「类声明」、「方法」、「方法参数」上。
+
+他的好处就是可以**编写元信息以内省代码**。看不懂？没关系，继续往下看。
+
+_我知道，网上的很多文章都看的让人十分痛苦，但我觉得我的文章并不会这样，我会尽量由浅入深的_
+
+## 函数运行消耗时间检测器
+
+我们先来制作一个时间检测器，用来检测函数的执行时间。
+
+```TypeScript
+const startTime = +new Date();
+doSomeThing();
+const endTime = +new Date();
+console.log(endTime - startTime);
+```
+
+当我们中间函数不是异步函数时，就可以通过 `endTime` 和 `startTime` 的差值计算出该函数操作消耗的时间。
+
+当然了，这是最简陋的做法，我们应该去封装一下，来个高级点的做法，比如使用一个函数：
+
+```TypeScript
+const timeRecorder = (fn) => {
+  const startTime = +new Date();
+  fn();
+  const endTime = +new Date();
+  console.log(endTime - startTime);
+}
+
+timeRecorder(doSomething);
+```
+
+这样虽然封装了，可我们不满足，因为这样一来我们根本没有自己来调用 `doSomething` 呀！
+
+**或者，我们可以更高级一点**，让函数 `return` 一个函数吧：
+
+```TypeScript
+const timeRecorder = (fn) => {
+  return () => {
+    const startTime = +new Date();
+    fn();
+    const endTime = +new Date();
+    console.log(endTime - startTime);
+  }
+}
+
+const doSomething = timeRecorder(foo);
+doSomething();
+```
+
+这个时候我们其实就可以叫 `timerRecorder` 的这种写法为装饰器模式了。
+
+## JS 的装饰器写法
+
+我们上面这种写法虽然好，但是这么好的写法语言当然要自己自带一下啦！
+
+TS 装饰器使用 `@expression` 这样的形式：
+
+```TypeScript
+@timerRecorder
+function doSomething() {
+  ......
+}
+```
+
+最后，总结一下：**`@expression` 求值后必须是一个函数，他会在运行时被调用，装饰器的声明信息作为「参数」被传入。**
