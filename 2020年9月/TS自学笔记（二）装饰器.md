@@ -65,6 +65,10 @@ doSomething();
 TS 装饰器使用 `@expression` 这样的形式：
 
 ```TypeScript
+function timerRecorder(fn: Function) {
+  ...
+}
+
 @timerRecorder
 function doSomething() {
   ......
@@ -95,7 +99,7 @@ function doSomething() {
 
 ```TypeScript
 function decoratorFactory() {
-  return function() {
+  return function(fn: Function) {
     // 这里是装饰器
   }
 }
@@ -105,7 +109,29 @@ function decoratorFactory() {
 
 这样我们的 `@decoratorFactory()` 就成为了一个装饰器。
 
-## 用在类上
+**那我们为什么需要装饰器工厂呢？**
+
+因为我们的装饰器可能会接受参数。写过 Angular 的同学应该知道，通常他的写法都是：
+
+```TypeScript
+@NgModule({
+  imports: [...],
+  ...
+})
+```
+
+如果是单纯的装饰器，我们是没办法传参数的，因此我们通过工厂函数+闭包来解决这一问题。
+
+```TypeScript
+function decoratorFactory(param1: any, param2: any) {
+  return function(fn: Function) {
+    doSomething(param1, param2);
+    fn()
+  }
+}
+```
+
+另外，写在类上的装饰器，装饰器**会作用，且仅会作用于**构造函数 `constructor`。
 
 ```TypeScript
 @foo
@@ -116,8 +142,6 @@ class Phone() {
   ......
 }
 ```
-
-写在类上的装饰器，装饰器**会作用，且仅会作用于**构造函数 `constructor`。
 
 也就是说，类装饰器可以用来「监视」、「修改」或者替换类的构造。
 
