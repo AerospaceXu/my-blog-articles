@@ -1,4 +1,4 @@
-# 在 React 中使用 hooks 与 TypeScript
+# React 与 Hooks 如何使用 TypeScript 书写类型？
 
 本文写于 2020 年 9 月 20 日
 
