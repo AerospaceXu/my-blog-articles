@@ -41,4 +41,12 @@ console.log(proxy.a); // 3
 
 其中 target 参数代表目标对象，handler 参数代表处理对象。缺少任何一个参数都会报错，如果需要创建空代理，要做的就是将空对象作为 handler 参数传入。
 
+```JavaScript
+const target = {
+  a: 1,
+};
+
+const p = new Proxy(target, {});
+```
+
 （完）
