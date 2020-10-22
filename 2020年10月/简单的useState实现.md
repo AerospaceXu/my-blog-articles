@@ -1,6 +1,6 @@
 # 关于 useState
 
-本文写于 2020 年 10 月 20 日
+本文写于 2020 年 10 月 21 日
 
 以下是一段非常简单的 React 代码：
 
@@ -104,50 +104,8 @@ const createUseState = () => {
 
 我们创建了一个 index 变量来控制索引。它需要我们保证每次重新渲染 App 传入数组的元素是一样的——这就是为什么我们不可以将 useState 写在 if 判断中。
 
-在上述代码中有一处重点，在于我们需要在每次 set 之后将索引归零 `index = 0`。
+在上述代码中有一处重点，在于我们**需要在每次 set 之后将索引归零 `index = 0`。**
 
-## 源码
-
-以上均是我们自己的猜测，看看源码是怎么实现的吧。
-
-```ts
-export function useState<S>(initialState: (() => S) | S) {
-  const dispatcher = resolveDispatcher();
-  return dispatcher.useState(initialState);
-}
-```
-
-这里的 `resolveDispatcher()` 返回的就是 `ReactCurrentDispatcher.current`。因此，`useState` 就是 `ReactCurrentDispatcher.current.useState`。
-
-于是我们寻找到 `ReactCurrentDispatcher` 的代码：
-
-```ts
-import type {Dispatcher} from 'react-reconciler/src/ReactFiberHooks';
-
-const ReactCurrentDispatcher = {
-  current: (null: null | Dispatcher),
-}
-```
-
-这时候就去找 ReactFiberHooks 这个文件吧。
-
-### Hook 类型
-
-```ts
-export type Hook = {
-  memoizedState: any; // 指向当前渲染节点 Fiber, 上一次完整更新之后的最终状态值
-
-  baseState: any; // 初始化 initialState， 已经每次 dispatch 之后 newState
-  baseUpdate: Update<any, any> | null; // 当前需要更新的 Update ，每次更新完之后，会赋值上一个 update，方便 react 在渲染错误的边缘，数据回溯
-  queue: UpdateQueue<any, any> | null; // 缓存的更新队列，存储多次更新行为
-
-  next: Hook | null; // link 到下一个 hooks，通过 next 串联每一 hooks
-};
-```
-
-这里可能有点看不太懂，我们一条条分析：
-
-1. memoizedState 是一个
-2. hooks 是一个单向链表，通过 next 属性可以访问到下一个 hook。
+因为每次 `render` 结束后，React 都会重新执行该函数。
 
 （完）
