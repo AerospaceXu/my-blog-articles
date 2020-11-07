@@ -1,5 +1,7 @@
 # 使用 ESLint, Prettier, Husky, Lint-staged 提升你的项目规范
 
+本文写于 2020 年 11 月 7 日
+
 大家应该都知道 ESLint 与 prettier，他们的用途分别在于约束代码和美化代码格式。
 
 但我们并不能保证每次提交代码之前我们的项目都执行过了 ESLint 与 prettier，所以我们需要 Git Hook，它能让我们在 git 操作的各个阶段进行一些自定义的操作。
