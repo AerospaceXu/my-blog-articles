@@ -141,6 +141,6 @@ Node.js 做了限制，会有最长占用时长的，根据操作系统而定。
 浏览器只有宏队列和微队列，比 Node.js 简单很多。（注意，这都不是 JS 引擎提供的，而是 Node 和浏览器提供的）。
 
 - 宏列队：用来保存待执行的 macrotask （宏任务），比如：timer / DOM 事件监听 / ajax 回调；
-- 微列队：用来保存待执行的 microtask（微任务），比如：Promise 的回调 / MutationObserver 的回调
+- 微列队：用来保存待执行的 microtask（微任务），比如：Promise 的回调 / MutationObserver 的回调。
 
 （完）
