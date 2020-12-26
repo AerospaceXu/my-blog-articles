@@ -27,4 +27,12 @@ p.then(onSuccess, onFail);
 - `then` 函数的返回值为 `Promise`；
 - `then` 可以被同一个 `Promise` 多次调用。
 
+### Promise 的解决过程
+
+Promise 的解决过程是一个抽象操作，接受一个 Promise 和一个 x。
+
+如果 x 等于 Promise，则抛出 TypeError，reject Promise。
+
+如果 x 为 promise 的实例，那么继续等到 x resolve 或者 reject，否则根据 x 的状态 resolve 或是 reject Promise。
+
 （完）
