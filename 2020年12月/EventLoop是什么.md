@@ -102,15 +102,23 @@ Event1 => Event2 => Event3 => Event1 => Event2 => ...
 
 这里可以看到 check 阶段检查的是 setImmediate 回调，有的面试题目可能会问 `setImmediate(fn)` 和 `setTimeout(fn, 0)` 谁先执行，这里我们就能回答了：不确定，因为 Event Loop 是个圈。
 
-另外，setImmediate 不是一个标准特性，MDN 不建议我们在生产环境中使用它，浏览器只有新版的 IE 支持。
+另外，setImmediate 不是一个标准特性，MDN 不建议我们在生产环境中使用它，**浏览器只有新版的 IE 支持**。
 
-在 Node 的 Event Loop 中，最常用的就是：timer 检查、poll 轮询、check 检查三个步骤。
+在 Node 的 Event Loop 中，最常用的就是：
 
-并且**大部分时间，Node.js 都停留在 poll 阶段**，文件请求、网络请求的事件处理也多半在这个阶段进行。所以 Node.js 会很智能的在其他阶段空闲时只停留在该阶段。
+- timer 检查；
+- poll 轮询；
+- check 检查。
 
-好吧，可能看不太懂这个图。
+我们先当作其他阶段都不存在了，只把这三个阶段作为循环。
 
-我们看官方例子：
+因为 timer 阶段处理定时器函数回调，check 阶段处理 setImmediate 回调，所以如果这两个执行栈没有任务的话，我们就不会走这两个阶段了。
+
+Node.js 会很智能的在其他阶段空闲时只停留在该阶段。
+
+并且**大部分时间，Node.js 都停留在 poll 阶段**，文件请求、网络请求的事件处理也多半在这个阶段进行。
+
+**官方例子：**
 
 ```js
 const fs = require('fs');
