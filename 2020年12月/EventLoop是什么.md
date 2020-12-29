@@ -4,7 +4,7 @@
 
 广义上来说 Event Loop 并不是 JavaScript 独有的概念，他是一个计算机的通用概念。
 
-另外**Node.js 的 Event Loop 和浏览器是不一样的。**
+狭义上来说，**只有 Node.js 才有 Event Loop，浏览器并没有。**
 
 ## 一个场景引发的困惑
 
@@ -227,11 +227,77 @@ setTimeout(() => {
 }, 0);
 ```
 
+这里我们会发现一个问题，刚刚 Node.js 的官方图**没有给出任何关于 Promise 的细节**，甚至于在原文中搜索 promise 也是一无所获。
+
+那是因为 Node.js 的 Promise 是以 nextTick 为基础实现的。
+
+nextTick 触发的时机是在**当前任务队列结束之后立即执行**。这里应该先输出 `'setTimeout1'`，再输出 `'promise'`，最后输出 `'setTimeout2'`。
+
 ## 浏览器的 Event Loop
 
 浏览器只有宏队列和微队列，比 Node.js 简单很多。（注意，这都不是 JS 引擎提供的，而是 Node 和浏览器提供的）。
 
 - 宏列队：用来保存待执行的 macrotask （宏任务），比如：timer / DOM 事件监听 / ajax 回调；
-- 微列队：用来保存待执行的 microtask（微任务），比如：Promise 的回调 / MutationObserver 的回调。
+- 微列队：用来保存待执行的 microtask（微任务），比如：Promise 的回调（then 方法） / MutationObserver 的回调。
+
+_在 Promise/A+的规范中，Promise 的实现可以是微任务，也可以是宏任务。但是普遍的共识表示（至少 Chrome 是这么做的），Promise 应该是属于微任务的。_
+
+当前执行栈执行完毕时，会立刻先处理所有「微任务」队列中的事件，然后再去「宏任务」队列中取出一个事件。也就是说**同一次 Event Loop 中，微任务永远在宏任务之前执行。**
+
+说到这里其实很明白了，Node.js 中的 Event Loop 有很多阶段，不停的循环；而浏览器中只有两个阶段，分别查看宏任务和微任务队列。
+
+看个例子：
+
+```js
+setTimeout(() => console.log(1), 0);
+
+new Promise((resolve) => {
+  console.log(2);
+  resolve('promise');
+}).then((res) => {
+  console.log(res);
+});
+
+console.log(3);
+```
+
+- 当我们执行 setTimeout 的时候，将回调函数存入宏队列；
+- 执行 `new Promise` 时，执行函数中的代码，将 then 任务存入微队列；
+- 执行 `console.log(3)`，当前执行栈执行完毕；
+- 执行微队列；
+- 执行宏队列。
+
+## 做道题总结一下
+
+OK，我们再看一道题目：
+
+```js
+const foo = async () => {
+  console.log('foo');
+  await bar();
+  console.log('bar end');
+};
+
+const bar = async () => {
+  console.log('bar');
+};
+
+foo();
+
+new Promise((resolve) => {
+  console.log('promise');
+  resolve('promise down');
+}).then((res) => {
+  console.log(res);
+});
+```
+
+首先第一步：因为 `async` `await` 是 Promise 的语法糖，所以需要将思维转化成 Promise，不可以真的把这段代码当成同步代码。
+
+- 所以先输出 `'foo'` 是没问题的，这相当于 `new Promise(() => { console.log('foo') })` 一样；
+- 然后输出 `'bar'` 也是没问题的，相当于在第一次 `new` 的 `Promise` 中又 `new` 了一次；
+- 接着输出 `'bar end'` 的语句应该被丢进微队列了；
+- 执行下方的 `Promise`，输出 `'promise'`，将 `then` 丢进微队列；
+- 执行微队列：先输出 `'bar end'`，后输出 `'promise down'`。
 
 （完）
