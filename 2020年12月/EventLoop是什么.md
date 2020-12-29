@@ -4,7 +4,7 @@
 
 广义上来说 Event Loop 并不是 JavaScript 独有的概念，他是一个计算机的通用概念。
 
-狭义上来说，**只有 Node.js 才有 Event Loop，浏览器并没有。**
+另外**Node.js 的 Event Loop 和浏览器是不一样的。**
 
 ## 一个场景引发的困惑
 
@@ -155,6 +155,77 @@ someAsyncOperation(() => {
 这里如果我们一直占着 poll 阶段做同步任务会怎么样呢？
 
 Node.js 做了限制，会有最长占用时长的，根据操作系统而定。
+
+## Event Loop 例题
+
+我们来做几道例题吧：
+
+### 例题一
+
+```js
+fs.readFile('xx.txt', () => {
+  console.log('fs');
+  setTimeout(() => {
+    console.log('setTimeout');
+  }, 0);
+  setImmediate(() => {
+    console.log('setImmediate');
+  });
+});
+```
+
+他们的输出顺序该是如何？
+
+因为 readFile 是读取文件，该操作既不是 timer，也不是 setImmediate，所以在 poll 阶段进行。
+
+poll 之后是 check，check 之后才是 timer。所以先执行 setImmediate，后执行 setTimeout。
+
+### 例题二
+
+```js
+setImmediate(() => {
+  console.log('setImmediate');
+  setTimeout(() => {
+    console.log('setTimeout in setImmediate');
+  }, 0);
+});
+
+setTimeout(() => {
+  console.log('setTimeout');
+  setImmediate(() => {
+    console.log('setImmediate in setTimeout');
+  });
+}, 0);
+```
+
+这题应该分情况讨论。
+
+情况一：
+
+如果是 timer 先执行，那我们必然会先执行外层的 setTimeout 的回调函数。输出完 `'setTimeout'` 之后，将 setImmediate 的回调放入 check 阶段——注意，这里 check 的执行栈中已经有了第一个 setImmediate 了。
+
+执行结束后，进入 check 阶段，执行第一个 setImmediate，输出 `'setImmediate'`，然后执行第二个 setImmediate，输出 `'setImmediate in setTimeout'`。再将 setTimeout 放入 timer 队列。执行结束。
+
+进入 timer 队列，输出 `'setTimeout in setImmediate'`。
+
+情况二：略
+
+### 例题三
+
+```js
+console.log(1);
+
+setTimeout(() => {
+  console.log('setTimeout1');
+  Promise.resolve('promise').then((res) => {
+    console.log(res);
+  });
+}, 0);
+
+setTimeout(() => {
+  console.log('setTimeout2');
+}, 0);
+```
 
 ## 浏览器的 Event Loop
 
