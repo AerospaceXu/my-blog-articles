@@ -1,5 +1,7 @@
 # hooks 与 animejs
 
+本文写于 2020 年 1 月 13 日
+
 animejs 是现如今非常不错的一个 js 动画库。我们将其与 React Hooks 融合，使它更方便的在 React 中使用。
 
 **最终效果：**
