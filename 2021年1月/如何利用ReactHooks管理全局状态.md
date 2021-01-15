@@ -14,11 +14,47 @@ Service 是 Angular 的逻辑复用方法，并且解决了共享状态的问题
 
 **可以，并且会比 Angular 更简洁！！！**
 
+## 什么是 Service
+
+我们先来想一下，Service 到底是什么？
+
+- Service 包含 n 个方法；
+- Service 包含有状态；
+- Service 应该是个单例。
+- 这些方法与状态应该是**高度整合**的，一个 Service 解决的是一个模块的问题。
+
+例如下面这个负责 Todo List 记录的 Service：
+
+```ts
+class TodoRecordService {
+  private todoList: Record[] = [];
+
+  get getTodoList() {
+    return this.todoList;
+  }
+
+  public addRecord(newRecord: Record) {
+    this.todoList.push(newRecord);
+  }
+
+  public deleteRecord(id: string) {
+    this.todoList = this.todoList.filter((record) => record.id !== id);
+  }
+
+  public getRecord(id: string) {
+    const targetIndex = this.todoList.findIndex((record) => record.id === id);
+    return { index: targetIndex, ele: this.todoList[targetIndex] };
+  }
+}
+```
+
 ## 自定义 Service
 
-材料：`useXxxx（自定义 hook）`, `createContext`, `useContext`。
+那我们用 React 如何实现一个状态共享的单例呢？
 
-我们做一个最简单的计数器吧：一个 button，一个 panel，button 用来增加，panel 用来展示。
+使用 `Context` 与 `useContext` 即可。
+
+接下来我们做一个最简单的计数器吧：一个负责计数的 button，一个负责显示当前数值的 panel。
 
 ```tsx
 const App: React.FC = () => {
@@ -34,22 +70,29 @@ const App: React.FC = () => {
 然后我们来定义我们的 Service：
 
 ```tsx
-// services/global.service.ts
 interface State {
   count: number;
   handleAdd: () => void;
 }
 
-export const GlobalService = createContext<State>(null);
+export const CountService = createContext<State>(null);
 ```
 
-我们选择让一个 Context 成为一个 Service，这是因为我们可以利用 Context 的特性来进行状态共享。
+我们选择让一个 Context 成为一个 Service，这是因为我们可以**利用 Context 的特性来进行状态共享**，达到单例的效果。
 
-然后我们创建一个自定义 Hook，并且在 `Context.provider` 中传入该 Root Service：
+但是光这样还不行，我们想让 `count` 拥有响应性，就必须使用 `useState`（或者其他 hook）来创建。
+
+因此需要一个自定义 Hook，并且在 `Context.Provider` 中传入 `Provider` 的 `value` 值：
 
 ```tsx
-// services/global.service.ts
-export const useRootGlobalService = () => {
+interface State {
+  count: number;
+  handleAdd: () => void;
+}
+
+export const CountService = createContext<State>(null);
+
+export const useRootCountService = () => {
   const [count, setCount] = useState<number>(0);
   const handleAdd = useCallback(() => {
     setCount((n) => n + 1);
@@ -62,45 +105,94 @@ export const useRootGlobalService = () => {
 };
 ```
 
-接着我们再创建一个自定义 Hook，让我们可以随时拿到该 Service：
+那么在组建中，我们如何使用 Service 呢？
+
+非常简单：
 
 ```tsx
-// services/global.service.ts
-export const useGlobalService = () => useContext(GlobalService);
+const App: React.FC = () => {
+  const countService = useContext(CountService);
+
+  return <div>{countService.count}</div>;
+};
 ```
 
-接着我们就可以运用了
+所以计数器的完整代码应该这么写：
 
 ```tsx
-// App.tsx
-import { GlobalService, useRooGlobalService } from './services/global.service';
+import { CountService, useRootCountService } from './service/count.service';
 
 const App: React.FC = () => {
   return (
-    <GlobalService.Provider value={useRooGlobalService()}>
+    <CountService.Provider value={useRooCountService()}>
       <div>
         <Button />
         <Panel />
       </div>
-    </GlobalService.Provider>
+    </CountService.Provider>
   );
 };
 
 // Button.tsx
-import { useGlobalService } from '../services/global.service';
+import { CountService } from '../services/global.service';
 
 const Button: React.FC = () => {
-  const { handleAdd } = useGlobalService();
-  return <button onClick={() => handleAdd()}>+</button>;
+  // 注意，此处是故意写复杂了，是为了凸显跨组件状态管理的特性
+  const countService = useContext(CountService);
+  return <button onClick={() => countService.handleAdd()}>+</button>;
 };
 
 // Panel.tsx
-import { useGlobalService } from '../services/global.service';
+import { CountService } from '../services/global.service';
 
 const Panel: React.FC = () => {
-  const { count } = useGlobalService();
-  return <h2>{count}</h2>;
+  const countService = useContext(CountService);
+  return <h2>{countService.count}</h2>;
 };
 ```
+
+## hooks 与 Service
+
+对于小组件而言，刚刚的写法已经足够了。
+
+但是要知道，**Service 是高度集中的某个模块的状态与方法**，我们不能保证 Service 的方法可以直接用到组件的逻辑中去。
+
+所以需要我们在组件内部对于逻辑进行二次拼装。
+
+但是**把逻辑直接写到组件里面是一件非常恶劣的事情**！！！
+
+幸好，React 有了 hooks 让我们去抽离逻辑代码。
+
+```tsx
+const useLogic1 = () => {
+  // 在 hook 中获取服务
+  const xxxService = useContext(XxxService);
+  // ...
+  const foo = useCallback(() => {
+    // ...
+    xxxService.xxxx();
+    // ...
+  }, []);
+
+  return {
+    // ...
+    foo,
+  };
+};
+
+const SomeComponent: React.FC = () => {
+  // 复用逻辑
+  const { a, b, foo } = useLogic1(someParams);
+  const { c, bar } = useLogic2();
+
+  return (
+    <div>
+      <button onClick={() => bar()}>Some Operation</button>
+    </div>
+  );
+};
+```
+
+这种形式的组件，便是我们的目标。
 
 （完）
