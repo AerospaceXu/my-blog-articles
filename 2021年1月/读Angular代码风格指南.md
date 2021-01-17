@@ -1,6 +1,6 @@
 # 读 Angular 代码风格指南
 
-<!-- TODO: 本文写于 2021 年 1 月 15 日 -->
+本文写于 2021 年 1 月 17 日
 
 原文地址：[Angular 文档](https://angular.cn/guide/styleguide)
 
@@ -50,6 +50,10 @@ ng 推荐使用点和横杠来分隔文件名——**在描述性名字中，用
 若为 `todo-list.service.ts`，则该命名为 `TodoListService`。
 
 也就是说，使用**大写驼峰命名法**来命名类，并且需要匹配符号名与它所在的文件名，在符号名后面追加约定的类型后缀（例如 Component、Service）。
+
+### 单元测试文件名
+
+应该与测试的文件保持一致，`xxx.xx.ts` 的单元测试文件名应该叫做 `xxx.xx.spec.ts`。
 
 ## 结构组织与 LIFT 原则
 
@@ -119,5 +123,22 @@ _可以使用上面说的，使用 `特性 + 后缀 + 文件类型` 的命名方
 坚持把所有源代码都放到名为 src 的目录里。
 
 坚持如果组件具有多个伴生文件 (.ts、.html、.css 和 .spec)，就为它创建一个文件夹。
+
+我习惯使用的前端目录结构：
+
+```
+- src
+  - app
+    - moduleA // 模块 B
+      - assets
+      - components
+      - ...
+    - moduleB // 模块 A
+    - shared // 共享模块
+  - layouts
+  - assets
+  - main.ts
+  - ...
+```
 
 （完）
