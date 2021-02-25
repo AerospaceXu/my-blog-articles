@@ -8,6 +8,10 @@
   - [简单介绍 Go 的并发](#简单介绍-go-的并发)
   - [Go 开启协程](#go-开启协程)
   - [使用 Channel 同步状态](#使用-channel-同步状态)
+    - [无缓冲的 Channel](#无缓冲的-channel)
+    - [有缓冲的 Channel](#有缓冲的-channel)
+    - [关闭 Channel](#关闭-channel)
+    - [select](#select)
   - [锁机制](#锁机制)
 
 ## 简单介绍 Go 的并发
@@ -134,7 +138,99 @@ func main() {
 
 运行程序我们发现。go 为我们先输出了 10 次“你好”，然后输出了 100，最后输出了 “main 结束”。
 
-这是因为 channel 如果在两个协程之间传输了数据，那么协程之间会自己阻塞，以保证用正确顺序传递 channel 数据。
+这是因为 channel 如果在两个协程之间传输了数据，**那么协程之间会自己阻塞，以保证用正确顺序传递 channel 数据**。
+
+### 无缓冲的 Channel
+
+上面的例子就是无缓冲的 Channel。
+
+**这就好像是接力一样，不管是谁先到接力点，都必须完成接力棒的交接才能够离开。**不能说你看上一棒的选手尚未到场，就火急火燎的自己先走了。
+
+### 有缓冲的 Channel
+
+有缓冲的 Channel 也可以通过 `make` 来创建，但是需要带上缓冲区大小：`ch := make(chan int, 3)`。
+
+缓冲区就像是一个队列，上一棒的选手不断的送接力棒到队列里。**和无缓冲的区别是：上一棒不需要管下一棒是否接到了。**
+
+下一棒会自己在缓冲区中取出上一棒放入的接力棒。
+
+但如果说，此时缓冲区的长度只有 3，我们可以尝试放入 4 个数据吗？
+
+是可以的。但是需要等待前面缓冲区的值被取出至少一个，能够空出下一次传入的空间才可以。
+
+在这种时候，传入放就会被阻塞，不能再像之前一样，放到缓冲区就可以离开了。
+
+另一种情况是拿取方拿取数据时发现缓冲区是空的，那么此时，也会阻塞该协程。
+
+### 关闭 Channel
+
+close 方法可以关闭一个 Channel，被关闭的 Channel 无法再传递数据。
+
+```go
+data, ok := <- ch
+
+if !ok {
+  fmt.Println("读取失败")
+}
+```
+
+可以用以上代码判断是否读取成功。
+
+```go
+func changeChannel(ch chan int) {
+	for i := 0; i < 3; i++ {
+	  ch <- i
+	}
+  close(ch)
+}
+
+func main() {
+	ch := make(chan int, 3)
+	go say(ch)
+  // 这里运用了 range 关键字处理 channel，注意：如果使用 range 关键字，必须使用 close 方法关闭 channel，不然会报错
+	for data := range ch {
+		fmt.Println(data)
+	}
+	fmt.Println("main 结束")
+}
+```
+
+### select
+
+`select` 可以帮助我们处理多个 Channel。
+
+```go
+select {
+case <- ch1:
+  // doSomething()
+case ch2 <- 666:
+  // doSomething()
+default:
+  // doSomething()
+}
+```
+
+如果从 ch1 读取数据成功，就进入第一个逻辑；如果没有触发，整个 select 都会阻塞；如果触发失败，则会进入 `ch2 <- 666` 那一行的逻辑判断。
+
+如果都没有触发，就会执行默认逻辑。
+
+select 很像 switch。一般情况下，我们会用一个无限的 for 循环套住他：
+
+```go
+for {
+	select {
+	case currentItem := <-ch:
+		fmt.Printf("a: %d\n", a)
+		a += currentItem
+	case <-quit:
+		fmt.Println("I quit")
+		fmt.Printf("a: %d\n", a)
+		break
+	default:
+		fmt.Println("default")
+	}
+}
+```
 
 ## 锁机制
 
