@@ -2,6 +2,23 @@
 
 本文写于 2020 年 5 月 6 日
 
+- [Ruby 趣学笔记（一）](#ruby-趣学笔记一)
+  - [变量](#变量)
+    - [变量声明](#变量声明)
+    - [变量类型](#变量类型)
+  - [常量](#常量)
+  - [输出](#输出)
+  - [字符串](#字符串)
+  - [字符串操作](#字符串操作)
+  - [函数](#函数)
+  - [class](#class)
+    - [class 下面有啥方法？](#class-下面有啥方法)
+    - [如何判断这个方法是否存在呢？](#如何判断这个方法是否存在呢)
+  - [Array](#array)
+    - [数组的遍历](#数组的遍历)
+    - [数组的连接](#数组的连接)
+    - [怎么判断该变量是否是数组](#怎么判断该变量是否是数组)
+
 最近在 mac 上探索到了 homebrew 的使用方法，对 ruby 的兴趣直线上升，所以来学一学。
 
 最近几年确实大家一直在唱衰 Ruby，整个社区的生态确实也不如 python 那么庞大，但是这都不妨碍 ruby 被称作“快乐编程”。
@@ -12,201 +29,114 @@
 
 其实这就是一个价值观的问题：人更值钱，那么就应该尽量节省人力；机器算力更值钱，那么就应该用人力去优化程序，来节省机器的算力。_但是国内的大环境大家也懂，人多爆了......_
 
-自然而然，从上面的结论来看，Ruby 在国内不会流行。作为多范式编程语言，Ruby 会比 Java 等更难协作；作为解释型语言，运行速度肯定比不上 C++ 超级慢……可很多人对于 Ruby 的评价仍然是：程序员的一把尖刀！
+自然而然，从上面的结论来看，Ruby 在国内不会流行。
+
+作为多范式编程语言，Ruby 会比 Java 等更难协作；作为解释型语言，运行速度肯定比不上 C++ 超级慢……可很多人对于 Ruby 的评价仍然是：程序员的一把尖刀！
 
 并且在 web 开发领域，还有一些大公司（GitHub）坚持在使用 Ruby，这足以说明 Ruby 的强大了！
 
-## 函数
+## 变量
 
-**普通函数**
+### 变量声明
 
-```ruby
-def sayHello
-  puts "Hello World."
-end
+Ruby 的变量声明不需要关键字，也不需要类型信息。
 
-sayHello
+```rb
+message = 'hello world'
+_num = 0
+
+$h = [1, 2, 3]
 ```
 
-函数的定义就这么简单，看起来还蛮像 python 的。但是我们继续深入，就会发现，ruby 的语言真的**令人舒适**。
+小写开头、`_` 开头的变量是局部变量；`$` 开头的单词是全局变量。
 
-**传参的函数**
+并且默认 Ruby 不存在闭包。
 
-```ruby
-def sayHello(name)
-  puts "Hello, #{name}."
-end
-```
+在函数内访问上级作用域的局部变量会报错。
 
-**参数的默认值**
+### 变量类型
 
-```ruby
-def sayHello(name = 'world')
-  puts "Hello, #{name}."
-end
-```
+Ruby 不存在所谓的“基本类型”，比如 `int` / `float` / `char`...Ruby 只存在一个类型：对象。
 
-如果我们不传入参数，那么就会自动将 'world' 赋给 `name` 变量。
-
-## class
-
-Ruby 是一个纯 OOP 语言，所以 class 必不可少！
-
-让我们来定义一个手机类：
-
-```ruby
-class Phone
-  def initialize(brand = '苹果', name = '刘好', number = 15_527_782_945)
-    @brand = brand
-    @name = name
-    @number = number
-  end
-
-  def call
-    puts "#{@name}使用#{@brand}手机，拨打了#{@number}的号码。"
-  end
-end
-
-iPhone = Phone.new
-
-iPhone2 = Phone.new('三星', '王自如', 1123321)
-```
-
-大家从这里就能看到，Ruby 的语言是多么的像英语。
-
-在这个类中我们可以看到有个 `@variable`，这个有什么用呢？其实就是一种变量。
-
-- 局部变量：局部变量是在方法中定义的变量，在方法外是不可用的，并且习惯以以小写字母或 `_` 开始（只是习惯）；
-- 实例变量：实例变量可以跨任何特定的实例或对象中的方法使用，这意味着，实例变量可以从对象到对象的改变，要想定义它，需要之前放置符号 `@`（这是语法，不是习惯！）；
-- 类变量：类变量可以跨不同的对象使用，它属于类，且是类的一个属性，要想定义它，需要在变量名之前放置符号 `@@`；
-- 全局变量：类变量不能跨类使用。如果想要有一个可以跨类使用的变量，您需要定义全局变量，它是以美元符号 `$` 开始的。
-
-那么如何改变实例变量呢？
-
-使用 `attr_accessor`：定义可存取对象的属性。
-
-```ruby
-class Game
-    attr_accessor :price #, :name
-    def initialize(name = "怪物猎人世界", price = 200)
-        @name = name
-        @price = price
-    end
-end
-```
-
-此时 `price` 变量就是可以改变的，`name` 就不可以改变。
-
-可以利用 `respond_to?` 来判断一下（_这个方法一会儿会说_）：
-
-```ruby
-myGame.respond_to?("name") # false
-myGame.respond_to?("price") # true
-```
-
-### class 下面有啥方法？
-
-`Phone.instance_methods(false)`
-
-这个方法，可以让我们知道该类下，有什么方法是我们自定义的。
-
-对于上面写的 `Phone` 类，输出结果就会是：
-
-```ruby
-call
-```
-
-就这么简单。
-
-如果中间写的是 `true` 呢，则会显示所有的方法，比如一些自带的方法。
-
-### 如何判断这个方法是否存在呢？
-
-```ruby
-iphone = Phone.new
-iphone.respond_to?("call")
-```
-
-`respond_to?` 这个方法可以判断该对象是否拥有某个方法，可以返回一个布尔值。
-
-所以我们通常可以这么用：`iPhone.respond_to?("call") && iPhone.call`
-
-## 变量类型
-
-什么？？？变量类型？
-
-Ruby 不存在所谓的“基本类型”，比如 `int` / `float` / `char`...
-
-一切皆对象的原则被严格恪守！
+一切皆对象的原则被严格恪守！我们可以不严谨的认为：**Ruby 的类型就是对象。**
 
 什么意思呢？
 
 ```ruby
-puts 1.to_s
+print(1.to_s)
 ```
 
-`to_s` 天生的就是 1 的方法！
+`to_s` 天生的就是 `1` 的方法！**数字 `1` 其实就是 Number 对象的实例。**
 
-对于数据类型来说，Ruby 拥有：Number、String、Ranges、Symbols，以及 true、false 和 nil 这几个特殊值，同时还有两种重要的数据结构——Array 和 Hash。
+## 常量
 
-### Array
+如同变量一样，Ruby 的常量声明也是通过约定。
 
-别的类型其实没太多好说的，都大同小异。
+所有首字母大写就代表常量，通常我们习惯将常量全大写（_也有例如 GOLANG 以及一些其他语言推荐使用大驼峰命名_）。
 
-我们从 Array 类型的方法，来体验一下 Ruby 的灵活性！
-
-```ruby
-games = ['魔兽世界', '塞尔达传说', '金庸群侠传']
-puts games
+```rb
+MAX_COUNT = 100
 ```
 
-这个 games 的定义，如果你在 RubyMine 或者其他强大的 IDE 中编写，他就会告诉你，有更好的方式：`games = %w[魔兽世界 塞尔达传说 金庸群侠传]`
+但 Ruby 毕竟还是个动态语言，即使是常量，我们也是可以强行修改的，只是会警告你而已。
 
-**这就是为什么 Ruby 不易协作**，一千个程序员有一千种写法与实现方法！
+```rb
+MAX_COUNT = 100
+MAX_COUNT = 101
 
-#### 数组的遍历
-
-这是永远的重点，编程中最为常用的方法。
-
-Ruby 可以通过 `each` 来遍历数组，具体语法如下：
-
-```ruby
-games.each do |game|
-  puts "我喜欢#{game}"
-end
+p MAX_COUNT # 101
 ```
 
-这个地方稍微提一句，我曾在某个地方看到过，写单引号的程序最后会比写双引号的小（文件大小）。但是这里这种模板字符串的写法，必须要双引号。
+## 输出
 
-**带上数组下标的遍历**
+Ruby 存在三种输出语句 `print` `puts` `p`。
 
-```ruby
-games.each_with_index do |game, i|
-  puts "第#{i}个游戏是#{game}"
-end
+其中，`p` 语句的输出可以让我们看到更多的信息，例如
+
+```rb
+p "hello" # "hello"
+puts "hello" # hello
 ```
 
-#### 数组的连接
+`p` 可以让我们看到是否是字符串，`puts` 则不可以。
 
-`games.join(',')`，这个方法其实很多语言都有，可以返回一个由逗号连接的、由数组每个元素顺序组成的字符串。
+所以一般程序中输出时会用 `p`，日志输出用 `print` 或 `puts`。
 
-#### 怎么判断该变量是否是数组
+## 字符串
 
-这个怎么判断呢？？？
+Ruby 可以用单引号或者双引号标注字符串，单引号中不会自动将转义字符转义、双引号会自动转义。
 
-很简单，还是运用 `respond_to?`。
+```rb
+p "a\nb" # 会换行
+p 'a\nb' # 不会换行，直接输出 \n
+```
 
-怎么用？
+双引号中还可以进行类似 JS 的模板字符串的插值：`"hello #{userName}"`。
 
-刚刚的 `each` 方法就可以！
+Ruby 也支持多行字符串。
 
-`games.respond_to?('each') && puts '这是一个数组！'`
+```rb
+str = <<fuck
+1
+2
+3
+3
+fuck
+```
+
+在 `<<` 后跟上某一个字符串，直到遇见相同的字符串，多行字符串就会结束。
+
+```rb
+str = <<fuck
+1
+2
+3
+3fuck
+```
+
+但这种情况不会结束，所以结束符必须位于单行。
 
 ## 字符串操作
-
-刚刚的一些示例代码，应该可以看出来一些套路。
-
-接下来总结一下：
 
 - `+`：字符连接
 - `<<`：字符带入
@@ -228,5 +158,157 @@ puts b
 a = "A"
 puts a * 4
 ```
+
+## 函数
+
+**普通函数**
+
+```ruby
+def sayHello
+  puts "Hello World."
+end
+
+sayHello() # Hello World.
+sayHello # Hello World.
+```
+
+这里可以看到，Ruby 的函数既可以带括号的调用，也可以直接调用。
+
+**传参的函数**
+
+```ruby
+def sayHello(name)
+  puts "Hello, #{name}."
+end
+```
+
+**参数的默认值**
+
+```ruby
+def sayHello(name = 'world')
+  puts "Hello, #{name}."
+end
+```
+
+## class
+
+让我们来定义一个手机类：
+
+```ruby
+class Phone
+  def initialize(brand = '苹果', name = '刘好', number = 15_527_782_945)
+    @brand = brand
+    @name = name
+    @number = number
+  end
+
+  def call
+    puts "#{@name}使用#{@brand}手机，拨打了#{@number}的号码。"
+  end
+end
+
+iPhone = Phone.new
+
+iPhone2 = Phone.new('三星', '王自如', 1123321)
+```
+
+与函数一样，class 实例化时调用 new 方法也不需要括号。
+
+Ruby 管 `@` 开头的变量叫做实例变量，`@@` 开头的叫做类变量。但其实类似于 Java 的成员变量和静态成员变量。
+
+但不同的是，Ruby 自带封装性。
+
+实例变量默认外部不可以访问，需要我们自定义一下 getter/setter。
+
+- `attr_accessor :xxx` 为 getter/setter
+- `attr_reader :xxx` 为 getter
+- `attr_writer :xxx` 为 setter
+
+```ruby
+class Game
+    attr_accessor :price
+    attr_reader :name
+    def initialize(name = "怪物猎人世界", price = 200)
+        @name = name
+        @price = price
+    end
+end
+```
+
+### class 下面有啥方法？
+
+`Phone.instance_methods(false)`
+
+这个方法，可以让我们知道该类下，有什么方法是我们自定义的。
+
+对于上面写的 `Phone` 类，输出结果就会是：
+
+```ruby
+call
+```
+
+就这么简单。
+
+如果参数为 `true` 呢，则会显示所有的方法，包括自带的方法。
+
+### 如何判断这个方法是否存在呢？
+
+```ruby
+iphone = Phone.new
+iphone.respond_to?("call")
+```
+
+`respond_to?` 这个方法可以判断该对象是否拥有某个方法，可以返回一个布尔值。
+
+所以我们通常可以这么用：`iPhone.respond_to?("call") && iPhone.call`
+
+## Array
+
+```ruby
+games = ['魔兽世界', '塞尔达传说', '金庸群侠传']
+puts games
+```
+
+这个 games 的定义，如果你在 RubyMine 或者其他强大的 IDE 中编写，他就会告诉你，有更好的方式：`games = %w[魔兽世界 塞尔达传说 金庸群侠传]`
+
+**这就是为什么 Ruby 不易协作**，一千个程序员有一千种写法与实现方法！
+
+### 数组的遍历
+
+这是永远的重点，编程中最为常用的方法。
+
+Ruby 可以通过 `each` 来遍历数组，具体语法如下：
+
+```ruby
+games.each do |game|
+  puts "我喜欢#{game}"
+end
+```
+
+这个地方稍微提一句，我曾在某个地方看到过，写单引号的程序最后会比写双引号的小（文件大小）。但是这里这种模板字符串的写法，必须要双引号。
+
+**带上数组下标的遍历**
+
+```ruby
+games.each_with_index do |game, i|
+  puts "第#{i}个游戏是#{game}"
+end
+```
+
+### 数组的连接
+
+`games.join(',')`，这个方法其实很多语言都有，可以返回一个由逗号连接的、由数组每个元素顺序组成的字符串。
+
+### 怎么判断该变量是否是数组
+
+这个怎么判断呢？？？
+
+很简单，还是运用 `respond_to?`。
+
+怎么用？
+
+刚刚的 `each` 方法就可以！
+
+`games.respond_to?('each') && puts '这是一个数组！'`
 
 （未完待续）
