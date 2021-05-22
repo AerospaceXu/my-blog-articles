@@ -10,14 +10,20 @@
   - [输出](#输出)
   - [字符串](#字符串)
   - [字符串操作](#字符串操作)
-  - [函数](#函数)
-  - [class](#class)
-    - [class 下面有啥方法？](#class-下面有啥方法)
-    - [如何判断这个方法是否存在呢？](#如何判断这个方法是否存在呢)
   - [Array](#array)
     - [数组的遍历](#数组的遍历)
     - [数组的连接](#数组的连接)
     - [怎么判断该变量是否是数组](#怎么判断该变量是否是数组)
+  - [函数](#函数)
+    - [普通函数](#普通函数)
+    - [传参的函数](#传参的函数)
+    - [解包参数](#解包参数)
+    - [部分参数解包](#部分参数解包)
+    - [参数的默认值](#参数的默认值)
+    - [传入一个散列](#传入一个散列)
+  - [class](#class)
+    - [class 下面有啥方法？](#class-下面有啥方法)
+    - [如何判断这个方法是否存在呢？](#如何判断这个方法是否存在呢)
 
 最近在 mac 上探索到了 homebrew 的使用方法，对 ruby 的兴趣直线上升，所以来学一学。
 
@@ -67,6 +73,14 @@ print(1.to_s)
 ```
 
 `to_s` 天生的就是 `1` 的方法！**数字 `1` 其实就是 Number 对象的实例。**
+
+Ruby 的数据类型有 Number、String、Ranges、Symbols，以及 true、false 和 nil，以及 Array、Hash。
+
+其中比较有意思的是 true 和 false，他们的 class 并不是 `Boolean`，而是 `TrueClass` 和 `FalseClass`。
+
+甚至连 class 都有 class——`Class`。
+
+事实上，**所有变量的 class 的 class，都是 `Class` 类。**
 
 ## 常量
 
@@ -159,9 +173,58 @@ a = "A"
 puts a * 4
 ```
 
+## Array
+
+```ruby
+games = ['魔兽世界', '塞尔达传说', '金庸群侠传']
+puts games
+```
+
+这个 games 的定义，如果你在 RubyMine 或者其他强大的 IDE 中编写，他就会告诉你，有更好的方式：`games = %w[魔兽世界 塞尔达传说 金庸群侠传]`
+
+**这就是为什么 Ruby 不易协作**，一千个程序员有一千种写法与实现方法！
+
+### 数组的遍历
+
+这是永远的重点，编程中最为常用的方法。
+
+Ruby 可以通过 `each` 来遍历数组，具体语法如下：
+
+```ruby
+games.each do |game|
+  puts "我喜欢#{game}"
+end
+```
+
+这个地方稍微提一句，我曾在某个地方看到过，写单引号的程序最后会比写双引号的小（文件大小）。但是这里这种模板字符串的写法，必须要双引号。
+
+**带上数组下标的遍历**
+
+```ruby
+games.each_with_index do |game, i|
+  puts "第#{i}个游戏是#{game}"
+end
+```
+
+### 数组的连接
+
+`games.join(',')`，这个方法其实很多语言都有，可以返回一个由逗号连接的、由数组每个元素顺序组成的字符串。
+
+### 怎么判断该变量是否是数组
+
+这个怎么判断呢？？？
+
+很简单，还是运用 `respond_to?`。
+
+怎么用？
+
+刚刚的 `each` 方法就可以！
+
+`games.respond_to?('each') && puts '这是一个数组！'`
+
 ## 函数
 
-**普通函数**
+### 普通函数
 
 ```ruby
 def sayHello
@@ -174,7 +237,7 @@ sayHello # Hello World.
 
 这里可以看到，Ruby 的函数既可以带括号的调用，也可以直接调用。
 
-**传参的函数**
+### 传参的函数
 
 ```ruby
 def sayHello(name)
@@ -182,12 +245,90 @@ def sayHello(name)
 end
 ```
 
-**参数的默认值**
+### 解包参数
+
+函数会自动解包传入的数组。
+
+```rb
+def foo(p1, p2, p3)
+  p p1 + p2 + p3
+end
+
+foo [1, 2, 3]
+```
+
+注意，这种将数组解包的函数，如果传入的数组长度大于参数数量，那么会直接报错。
+
+### 部分参数解包
+
+传入的多余参数转化为数组。
+
+```rb
+def foo(base, *rest)
+  rest.each do |item|
+    base += item
+  end
+
+  return base
+end
+
+foo 1, 2, 3, 4, 5
+```
+
+`*rest` 参数可以不在末尾。
+
+```rb
+def foo(base, *rest, final)
+  p base
+  p rest
+  p final
+end
+
+foo 1, 2, 3, 4, 5 # base 1, rest [2, 3, 4], final 5
+foo 1, 2 # base 1, rest [], final 2
+foo 1 # 报错
+```
+
+### 参数的默认值
 
 ```ruby
 def sayHello(name = 'world')
   puts "Hello, #{name}."
 end
+
+sayHello "啦啦啦"
+```
+
+### 传入一个散列
+
+该形式必须提供默认值。
+
+```ruby
+def sayHello(url: "", id: 0)
+  puts "#{url}?id=#{id}."
+end
+
+sayHello url: "xxx", id: 5
+```
+
+这就类似于 JS 中的：
+
+```js
+function foo({ a, b } = { a: 1, b: 1 }) {}
+```
+
+这种形式还可以直接传入一个散列，但是必须保证 key 类型是 Symbol 类型，String 或者其他类型都会导致报错：
+
+```rb
+h = {
+  :p1 => 100,
+  :p2 => 200
+}
+
+h_err = {
+  'p1' => 100,
+  'p2' => 200
+}
 ```
 
 ## class
@@ -261,54 +402,5 @@ iphone.respond_to?("call")
 `respond_to?` 这个方法可以判断该对象是否拥有某个方法，可以返回一个布尔值。
 
 所以我们通常可以这么用：`iPhone.respond_to?("call") && iPhone.call`
-
-## Array
-
-```ruby
-games = ['魔兽世界', '塞尔达传说', '金庸群侠传']
-puts games
-```
-
-这个 games 的定义，如果你在 RubyMine 或者其他强大的 IDE 中编写，他就会告诉你，有更好的方式：`games = %w[魔兽世界 塞尔达传说 金庸群侠传]`
-
-**这就是为什么 Ruby 不易协作**，一千个程序员有一千种写法与实现方法！
-
-### 数组的遍历
-
-这是永远的重点，编程中最为常用的方法。
-
-Ruby 可以通过 `each` 来遍历数组，具体语法如下：
-
-```ruby
-games.each do |game|
-  puts "我喜欢#{game}"
-end
-```
-
-这个地方稍微提一句，我曾在某个地方看到过，写单引号的程序最后会比写双引号的小（文件大小）。但是这里这种模板字符串的写法，必须要双引号。
-
-**带上数组下标的遍历**
-
-```ruby
-games.each_with_index do |game, i|
-  puts "第#{i}个游戏是#{game}"
-end
-```
-
-### 数组的连接
-
-`games.join(',')`，这个方法其实很多语言都有，可以返回一个由逗号连接的、由数组每个元素顺序组成的字符串。
-
-### 怎么判断该变量是否是数组
-
-这个怎么判断呢？？？
-
-很简单，还是运用 `respond_to?`。
-
-怎么用？
-
-刚刚的 `each` 方法就可以！
-
-`games.respond_to?('each') && puts '这是一个数组！'`
 
 （未完待续）
